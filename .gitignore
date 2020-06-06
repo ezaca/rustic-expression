@@ -1,0 +1,9 @@
+/CSharp/.vs
+/CSharp/bin
+/CSharp/obj
+
+/LivePreview/.vs
+/LivePreview/bin
+/LivePreview/obj
+
+/LivePreview/packages
