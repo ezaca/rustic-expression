@@ -47,6 +47,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RusticExpression\DebugExtension.cs" />
     <Compile Include="RusticExpression\Evaluators\Literal.cs" />
+    <Compile Include="RusticExpression\Operations\PrefixUnary\Positive.cs" />
+    <Compile Include="RusticExpression\Operations\PrefixUnary\Negative.cs" />
     <Compile Include="RusticExpression\Operations\Div.cs" />
     <Compile Include="RusticExpression\Operations\Sub.cs" />
     <Compile Include="RusticExpression\Operations\Add.cs" />
@@ -59,7 +61,6 @@
     <Compile Include="RusticExpression\RusticOperation.cs" />
     <Compile Include="RusticExpression\RusticParser.cs" />
     <Compile Include="RusticExpression\RusticStack.cs" />
-    <Compile Include="RusticExpression\RusticStringParserV1.cs" />
     <Compile Include="RusticExpression\RusticToken.cs" />
     <Compile Include="RusticExpression\RusticValueEvaluator.cs" />
     <Compile Include="RusticExpression\Evaluators\StackReference.cs" />

@@ -8,17 +8,19 @@ namespace ExpressionStack.RusticExpression
 {
     public class RusticToken
     {
-        public RustickTokenMode mode;
+        public RusticTokenMode mode;
         public object value;
 
-        public RusticToken(RustickTokenMode mode, object value)
+        public RusticToken(RusticTokenMode mode, object value)
         {
             this.mode = mode;
             this.value = value;
         }
+
+        public override string ToString() => $"RusticToken({mode}, \"{value}\")";
     }
 
-    public enum RustickTokenMode
+    public enum RusticTokenMode
     {
         Ignored,
         Literal,

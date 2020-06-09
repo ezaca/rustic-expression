@@ -1,13 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ExpressionStack.RusticExpression.Operations.Providers
 {
     static class CommonMath
     {
+        static public Dictionary<Type, Func<object, object, object>> Negative = new Dictionary<Type, Func<object, object, object>>()
+        {
+            { typeof(float), NegativeSingle },
+            { typeof(double), NegativeDouble },
+            { typeof(int), NegativeInt32 }
+        };
+
+        static object NegativeSingle(object a, object b) => -Convert.ToSingle(a);
+        static object NegativeDouble(object a, object b) => -Convert.ToDouble(a);
+        static object NegativeInt32(object a, object b) => -Convert.ToInt32(a);
+
+        static public Dictionary<Type, Func<object, object, object>> Positive = new Dictionary<Type, Func<object, object, object>>()
+        {
+            { typeof(float), PositiveSingle },
+            { typeof(double), PositiveDouble },
+            { typeof(int), PositiveInt32 }
+        };
+
+        static object PositiveSingle(object a, object b) => Convert.ToSingle(a);
+        static object PositiveDouble(object a, object b) => Convert.ToDouble(a);
+        static object PositiveInt32(object a, object b) => Convert.ToInt32(a);
+
         static public Dictionary<Type, Func<object, object, object>> Add = new Dictionary<Type, Func<object, object, object>>()
         {
             { typeof(float), AddSingle },

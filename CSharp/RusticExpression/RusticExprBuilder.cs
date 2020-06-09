@@ -12,7 +12,7 @@ namespace ExpressionStack.RusticExpression
         protected RusticStack currentStack;
         protected int priorityOffset;
 
-        protected List<RusticStack> stacks => expression.stacks;
+        protected List<RusticStack> stacks => expression?.stacks;
 
         protected RusticExprBuilder() : this(null, null) { }
 
@@ -25,8 +25,8 @@ namespace ExpressionStack.RusticExpression
             this.context = context;
             nextOperation = new Operations.Set();
             priorityOffset = 0;
-            stacks.Add(new RusticStack(0, null, 1));
-            currentStack = stacks[0];
+            stacks?.Add(new RusticStack(0, null, 1));
+            currentStack = stacks?[0];
         }
 
         public RusticExprBuilder(RusticExpr expression, RusticContext context, string expressionLine)
@@ -38,7 +38,10 @@ namespace ExpressionStack.RusticExpression
             => PutTokens(tokenList);
 
         public void ParseAndPutTokens(string expression)
-            => PutTokens(Enumerable.ToArray(RusticStringParserV1.GetTokenList(expression)));
+        {
+            RusticParser parser = new RusticParser(context);
+            PutTokens(Enumerable.ToArray(parser.GetTokenList(expression)));
+        }
 
         public void PutTokens(params RusticToken[] tokens)
         {
@@ -50,10 +53,10 @@ namespace ExpressionStack.RusticExpression
         {
             switch (token.mode)
             {
-                case RustickTokenMode.Literal: PutValueToken(token.value); break;
-                case RustickTokenMode.VariableName: PutVariableToken(token.value.GetHashCode()); break;
-                case RustickTokenMode.Operation: PutOperationToken((RusticOperation)token.value); break;
-                case RustickTokenMode.PriorityOffset: ChangePriority((int)token.value); break;
+                case RusticTokenMode.Literal: PutValueToken(token.value); break;
+                case RusticTokenMode.VariableName: PutVariableToken(token.value.ToString()); break;
+                case RusticTokenMode.Operation: PutOperationToken((RusticOperation)token.value); break;
+                case RusticTokenMode.PriorityOffset: ChangePriority((int)token.value); break;
                 default: throw new NotImplementedException();
             }
         }
@@ -67,11 +70,11 @@ namespace ExpressionStack.RusticExpression
             nextOperation = null;
         }
 
-        private void PutVariableToken(int variableId)
+        private void PutVariableToken(string variableName)
         {
             if (nextOperation == null)
                 throw new Exception("Expecting operator, but received value");
-            nextOperation.parameter = new Evaluators.Variable(context, variableId);
+            nextOperation.parameter = new Evaluators.Variable(context, variableName);
             currentStack.operations.Add(nextOperation);
             nextOperation = null;
         }
@@ -100,7 +103,7 @@ namespace ExpressionStack.RusticExpression
             if (operation.GetPriorityWithOffset() <= (int)RusticOperation.Priority.Ignored)
                 PutOperationOfEqualOrIgnoredPriority(operation);
             else
-            if (currentStack.priority < operation.GetPriorityWithOffset()) // TO-DO: Alterar para inserir operadores RTL
+            if ((operation.HasRightToLeftPrecedence() && currentStack.priority <= operation.GetPriorityWithOffset()) || currentStack.priority < operation.GetPriorityWithOffset()) // TO-DO: Alterar para inserir operadores RTL
                 PutOperationOfHigherPriority(operation);
             else
             if (currentStack.priority > operation.GetPriorityWithOffset())
@@ -172,6 +175,21 @@ namespace ExpressionStack.RusticExpression
             if (discard != null)
                 foreach (RusticStack item in discard)
                     stacks.Remove(item);
+
+            // Simplify the stack register R0
+            if (stacks.Count > 0 && stacks[0].operations.Count == 1)
+            {
+                RusticOperation set;
+                if ((set = stacks[0].operations[0] as Operations.Set) != null)
+                {
+                    stacks[0].operations.Clear();
+                    RusticStack stack = ((Evaluators.StackReference)set.parameter).stack;
+                    stacks[0].operations.AddRange(stack.operations);
+                    stacks[0].priority = stack.priority;
+                    stacks.Remove(stack);
+                }
+            }
+            FinalizeExpression();
         }
 
         public void FinalizeAndSimplify()

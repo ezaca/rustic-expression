@@ -34,9 +34,8 @@ namespace ExpressionStack.RusticExpression
                 new RusticExprBuilder(this, context, expression).FinalizeExpression();
         }
 
-        public object Execute(Dictionary<int, object> inputs = null)
+        public object Execute()
         {
-            context.variables = inputs;
             for (int r = stacks.Count - 1; r >= 0; r--)
             {
                 stacks[r].Execute();

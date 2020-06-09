@@ -13,7 +13,7 @@
   // Enable the Bridge Console.
   // Default is false.
   "console": {
-    "enabled": true
+    "enabled": false
   },
 
   // Enable browser debugging of C# files.
@@ -63,7 +63,7 @@
   // and add the file to the output directory.
   // Default is false.
   "html": {
-    "disabled": false
+    "disabled": true
   },
 
   // Add compilation logging to your Project.

@@ -1,5 +1,6 @@
 ﻿using ExpressionStack.RusticExpression;
 using System;
+using System.Collections.Generic;
 
 namespace ExpressionStack
 {
@@ -7,41 +8,88 @@ namespace ExpressionStack
     {
         static void Main(string[] args) => (new Program())._Main(args);
 
+        struct TestExpr
+        {
+            public string input;
+            public object result;
+            public string explain;
+        }
+
+        List<TestExpr> expressions = new List<TestExpr>()
+        {
+            new TestExpr(){ input="1 + 1", result = 2 },
+            new TestExpr(){ input="(1 + 1)", result = 2 },
+            new TestExpr(){ input="2 * (1 + 1f)", result = 4f, explain = "because of parenthesis, and the order of execution makes all Single values." },
+            new TestExpr(){ input="2 ** 2 ** 3", result = 256d, explain="64 is invalid because power operator has right precedence." },
+        };
+
+        int selectedExpression = 0;
+
         void _Main(string[] args)
         {
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
-            RusticExpr expr = new RusticExpr("1.0f + 2 * (3 + 4) + (5 + (2) - 2) * 2");
-            // 1 + 2 * (3 + 4) + (5 + (2) - 2) * 2
-            // 1 + 2 * 7 + (5 + 2 - 2) * 2
-            // 1 + 2 * 7 + 5 * 2
-            // 1 + 14 + 10
-            // 15 + 10
-            // 25
+            bool simplify = false;
+            ConsoleKeyInfo key = new ConsoleKeyInfo((char)0, (ConsoleKey)0, false, false, false);
+            do
+            {
+                switch (key.Key)
+                {
+                    case ConsoleKey.UpArrow: selectedExpression--; simplify = false; break;
+                    
+                    case ConsoleKey.DownArrow: selectedExpression++; simplify = false; break;
+                    
+                    case ConsoleKey.Enter:
+                    case ConsoleKey.Spacebar: simplify = ! simplify; break;
+                    
+                    case ConsoleKey.Home: selectedExpression = 0; break;
+                    
+                    case ConsoleKey.End: selectedExpression = expressions.Count - 1; break;
+                }
 
-            /*
-             * R0:  set 1
-             *      add R1
-             *      add R5
-             * R1:  set 2
-             *      mul R2
-             * R2:  set 3
-             *      add 4
-             * R3:  set 5
-             *      add R4
-             *      sub 2
-             * R4:  set 2
-             * R5:  set R3
-             *      mul 2
-             */
-            
+                if (selectedExpression < 0)
+                    selectedExpression = 0;
+                else
+                if (selectedExpression >= expressions.Count)
+                    selectedExpression = expressions.Count - 1;
 
-            object result = expr.Execute();
-            Console.WriteLine($"Result (R0) = {result} [{result.GetType().Name}]");
-            Console.WriteLine();
-            expr.PrintDebug();
-            while (Console.ReadKey(true).Key != ConsoleKey.Escape)
-                continue;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.Clear();
+                Console.WriteLine("Test expressions:");
+                for (int expId = 0; expId < expressions.Count; expId++)
+                {
+                    Console.BackgroundColor = selectedExpression == expId ? ConsoleColor.DarkBlue : ConsoleColor.Black;
+                    Console.WriteLine($"{(selectedExpression == expId ? " > " : "   ")}{expressions[expId].input} ".PadRight(40));
+                }
+                Console.WriteLine();
+                Console.BackgroundColor = ConsoleColor.Black;
+
+                TestExpr test = expressions[selectedExpression];
+                RusticExpr expr = new RusticExpr(test.input);
+
+                if (simplify)
+                    RusticExprBuilder.SimplifyExpression(expr);
+
+                object result = expr.Execute();
+                Console.WriteLine($"Expectation = {test.result ?? "null"} [{test.result?.GetType().Name}]{(test.explain != null ? $", {test.explain}" : " (no further explanation)")}");
+                Console.WriteLine($"Result (R0) = {result} [{result.GetType().Name}]");
+
+                if (result is IComparable && test.result is IComparable)
+                    try
+                    {
+                        Console.WriteLine(((IComparable)result).CompareTo(test.result) == 0 ? "Match" : "/!\\ Values are not equal.");
+                    }
+                    catch (System.Exception)
+                    {
+                        Console.WriteLine("Could not compare values automatically");
+                    }
+
+                Console.WriteLine();
+                expr.PrintDebug();
+                if (simplify)
+                    Console.WriteLine("Showing simplified version.");
+            } while ((key = Console.ReadKey(true)).Key != ConsoleKey.Escape);
         }
 
         void WaitAndRewrite()
