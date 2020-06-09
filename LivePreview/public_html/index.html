@@ -1,0 +1,87 @@
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta charset="utf-8">
+    <title>Rustic Expression</title>
+    
+    <script src="js/bridge.js"></script>
+    <script src="js/bridge.meta.js"></script>
+    <script src="js/newtonsoft.json.js"></script>
+    <script src="js/LivePreview.js"></script>
+    <script src="js/LivePreview.meta.js"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+	<link href="style.css" rel="stylesheet">
+</head>
+<body>
+	<h1>
+		RusticExpression
+		<a class="logo" href="https://github.com/ezaca/rustic-expression">
+			<img width="25" height="25" src="https://cdn.brandicons.org/icons/light/github.svg">
+		</a>
+	</h1>
+	<main>
+
+		<div class="story">
+		<p>
+		<h3>What is it?</h3>
+		RusticExpression is a .NET (C#) code that allows you to parse and execute simple expressions.
+		I made it for fun in the evening and weekends, but it seems to have grown stable enough
+		for me to share with people.</p>
+		
+		<p>The primary purpose of the code was the self-proposed challenge to create an expression
+		parser without a binary tree. Well, I believe I pretty succeeded in that, but of course,
+		it ended up with a kind of "rustic" tree structure, thus the name.</p>
+		</div>
+
+		<div class="story">
+		<h3>Planned features</h3>
+		<ul>
+			<li>Add feature: left and right operator type (like ++)</li>
+			<li>Add feature: function call using Reflection</li>
+			<li>Add platform support: Unity;</li>
+		</ul>
+		</div>
+
+		<div class="story large">
+			<h3>Live preview <span>Bridge.NET</span></h3>
+			
+			<small class="block" style="margin-bottom:1rem;margin-top:0rem;">Results may vary to C# due to the way Javascript handle numbers. <a id="permalink" href="#">Permalink to expression below</a>.</small>
+
+			<input type="text" id="tExpression" value="1 + 2 * 3 - 4">
+
+			<small class="block">
+				Available operators:
+				<span class="nobr"><code>+</code> (sum),</span>
+				<span class="nobr"><code>-</code> (subtraction),</span>
+				<span class="nobr"><code>*</code> (multiplication),</span>
+				<span class="nobr"><code>/</code> (division),</span>
+				<span class="nobr"><code>**</code> (power),</span>
+				<span class="nobr"><code>( )</code> (parenthesis).</span>
+			</small>
+			<small class="block">
+				Available literals:
+				integer,
+				double,
+				float.
+			</small>
+			
+			<div id="expr-resultbox"></div>
+		</div>
+		
+		<div class="story">
+			<h3>See you! ;)</h3>
+			<a class="large-button" href="https://github.com/ezaca/rustic-expression">GitHub</a>
+			<small class="block">The source is available under the permissive MIT License.</small>
+			<small class="block">2020 &copy; Eliakim Zacarias.</small>
+		</div>
+	</main>
+	<script type="text/javascript">
+	
+		if (window.location.hash.length > 1)
+			document.getElementById("tExpression").value = decodeURI(window.location.hash.substr(1));
+
+		document.getElementById("tExpression").addEventListener("input", ev=>{
+			document.getElementById("permalink").setAttribute("href", window.location.href.replace(/#.*|$/, "#"+encodeURI(document.getElementById("tExpression").value)));
+		});
+	
+	</script>
+</body>
+</html>
