@@ -10,4 +10,6 @@ The primary purpose of the code was the self-proposed challenge to create an exp
 
 ### [Live Preview](https://ezaca.github.io/rustic-expression/)
 
-RusticExpression is developed in C#, a .NET language which has the [Bridge.net](https://bridge.net/).
+[RusticExpression](https://ezaca.github.io/rustic-expression/) is developed in C#, a .NET language which has the [Bridge.net](https://bridge.net/).
+
+[Go to RusticExpression live preview](https://ezaca.github.io/rustic-expression/)
