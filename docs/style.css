@@ -62,6 +62,7 @@ span.nobr{
 }
 table{
     border-spacing: 0;
+	background: white;
 }
 table td, table th{
     text-align: left;
