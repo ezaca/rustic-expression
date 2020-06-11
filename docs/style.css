@@ -91,6 +91,13 @@ div.story{
 div.story.large{
 	max-width: 120ex;
 }
+.strike-green{
+	text-decoration: line-through;
+	text-decoration-color: green;
+}
+.tooltip{
+	cursor: help;
+}
 h3 > span, h2 > span {
 	font-weight: normal;
 	font-size: 0.5em;

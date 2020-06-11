@@ -18,7 +18,7 @@ namespace ExpressionStack.RusticExpression
                 if (executed)
                     return result;
                 else
-                    throw new System.Exception("This stack did not execute yet");
+                    throw new Exception("This stack did not execute yet");
             }
         }
 
@@ -34,6 +34,20 @@ namespace ExpressionStack.RusticExpression
 
         public void Prepare()
         {
+            List<RusticOperation> moveLeftUnaryOperations = new List<RusticOperation>();
+            foreach(RusticOperation operation in operations)
+            {
+                if (operation.IsLeftUnary)
+                    moveLeftUnaryOperations.Add(operation);
+            }
+
+            for (int i = moveLeftUnaryOperations.Count - 1; i >= 0; i--)
+            {
+                RusticOperation operation = moveLeftUnaryOperations[i];
+                operations.Remove(operation);
+                operations.Add(operation);
+            }
+
             PreviewResultType();
         }
 
@@ -63,10 +77,21 @@ namespace ExpressionStack.RusticExpression
         public string ToExpressionString()
         {
             string str = " (";
+            int first = operations.FindIndex(op => op.IsLeftUnary);
+
+            if (first >= 0)
+            {
+                for (int i = first; i < operations.Count; i++)
+                    str += operations[i].ToExpressionString();
+            }
+
             for(int i = 0; i < operations.Count; i++)
             {
+                if (operations[i].IsLeftUnary)
+                    break;
                 str += operations[i].ToExpressionString();
             }
+
             str += " )";
             return str;
         }

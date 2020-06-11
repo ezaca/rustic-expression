@@ -29,6 +29,6 @@ namespace ExpressionStack.RusticExpression.Operations.PrefixUnary
             }
         }
 
-        public override string ToExpressionString() => $" *-1 {(parameter != null ? parameter.GetType().Name : "null")}";
+        public override string ToExpressionString() => $" -";
     }
 }

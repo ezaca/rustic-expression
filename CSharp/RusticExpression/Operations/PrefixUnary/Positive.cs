@@ -29,6 +29,6 @@ namespace ExpressionStack.RusticExpression.Operations.PrefixUnary
             }
         }
 
-        public override string ToExpressionString() => $"";
+        public override string ToExpressionString() => $" +";
     }
 }

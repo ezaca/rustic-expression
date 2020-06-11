@@ -69,7 +69,11 @@ namespace ExpressionStack.RusticExpression
 
         public void Initialize()
         {
+#if BRIDGE_NET
             RegexOptions options = RegexOptions.None;
+#else
+            RegexOptions options = RegexOptions.Compiled;
+#endif
             valueExpr = new Regex($"({ string.Join(")|(", ValuePattern.ConvertAll(v => v.pattern)) })", options);
             leftOpExpr = new Regex($"({ string.Join(")|(", LeftOperators.ConvertAll(v => v.pattern)) })", options);
             midOpExpr = new Regex($"({ string.Join(")|(", MiddleOperators.ConvertAll(v => v.pattern)) })", options);

@@ -61,22 +61,23 @@ namespace ExpressionStack.RusticExpression
             }
         }
 
-        private void PutValueToken(object value)
+        private void PutCustomValueToken(RusticValueEvaluator value)
         {
             if (nextOperation == null)
-                throw new Exception("Expecting operator, but received value");
-            nextOperation.parameter = new Evaluators.Literal(value);
+                throw new Exception($"Expecting operator, but received operand ({value.GetType().Name})");
+            nextOperation.parameter = value;
             currentStack.operations.Add(nextOperation);
             nextOperation = null;
         }
 
+        private void PutValueToken(object value)
+        {
+            PutCustomValueToken(new Evaluators.Literal(value));
+        }
+
         private void PutVariableToken(string variableName)
         {
-            if (nextOperation == null)
-                throw new Exception("Expecting operator, but received value");
-            nextOperation.parameter = new Evaluators.Variable(context, variableName);
-            currentStack.operations.Add(nextOperation);
-            nextOperation = null;
+            PutCustomValueToken(new Evaluators.Variable(context, variableName));
         }
 
         private void ChangePriority(int addition)
@@ -97,7 +98,15 @@ namespace ExpressionStack.RusticExpression
         private void PutOperationToken(RusticOperation operation)
         {
             if (nextOperation != null)
-                throw new Exception("Unexpected operator found");
+            {
+                if (operation.IsLeftUnary)
+                {
+                    PutLeftOperationToken(operation);
+                    return;
+                }
+                else
+                    throw new Exception("Unexpected operator found");
+            }
 
             operation.priorityOffset = priorityOffset;
             if (operation.GetPriorityWithOffset() <= (int)RusticOperation.Priority.Ignored)
@@ -110,6 +119,24 @@ namespace ExpressionStack.RusticExpression
                 PutOperationOfLowerPriority(operation);
             else
                 PutOperationOfEqualOrIgnoredPriority(operation);
+        }
+
+        private void PutLeftOperationToken(RusticOperation operation)
+        {
+            if (currentStack.priority == operation.GetPriorityWithOffset())
+            {
+                currentStack.operations.Add(operation);
+            } else
+            {
+                RusticStack newStack = new RusticStack(stacks.Count, currentStack, operation.GetPriorityWithOffset());
+                newStack.operations.Add(operation);
+                int index = stacks.IndexOf(currentStack);
+                stacks.Insert(index + 1, newStack);
+
+                PutCustomValueToken(new Evaluators.StackReference(newStack));
+                currentStack = newStack;
+                nextOperation = new Operations.Set();
+            }
         }
 
         private void PutOperationOfHigherPriority(RusticOperation operation)
@@ -148,7 +175,7 @@ namespace ExpressionStack.RusticExpression
 
             foreach (RusticStack stack in stacks)
             {
-                stack.displayId = ++index;
+                stack.displayId = index++;
                 stack.Prepare();
             }
         }
