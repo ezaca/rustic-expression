@@ -5,7 +5,7 @@ namespace ExpressionStack.RusticExpression
 {
     class RusticContext
     {
-        public RusticExpr expression { get; private set; }
+        public RusticExpr expression { get; set; }
         public IReadOnlyList<RusticStack> stack => expression.stacks;
         public Dictionary<string, object> variables { get; set; }
         public Dictionary<string, Type> availableTypeCasts { get; set; }

@@ -10,32 +10,34 @@ namespace ExpressionStack.RusticExpression
 
         public readonly List<RusticStack> stacks = new List<RusticStack>();
 
-        private RusticContext context;
+        public RusticContext context { get => _context; set => SetContext(value); }
 
-        public RusticExpr() => ResetExpression();
+        private RusticContext _context;
 
-        public RusticExpr(RusticContext context) : this() => this.context = context;
+        public RusticExpr() { }
+
+        public RusticExpr(RusticContext context) : this() => SetContext(context);
 
         public RusticExpr(string expression) : this() => SetExpression(expression);
 
         public RusticExpr(string expression, RusticContext context) : this()
         {
-            this.context = context;
+            SetContext(context);
             SetExpression(expression);
         }
 
-        public void ResetExpression()
+        public void SetContext(RusticContext context)
         {
-            stacks.Clear();
-            context = new RusticContext();
+            _context = context;
+            _context.expression = this;
         }
 
         public void SetExpression(string expression)
         {
             if (PreferSimplifiedExpression)
-                new RusticExprBuilder(this, context, expression).FinalizeAndSimplify();
+                new RusticExprBuilder(this, _context, expression).FinalizeAndSimplify();
             else
-                new RusticExprBuilder(this, context, expression).FinalizeExpression();
+                new RusticExprBuilder(this, _context, expression).FinalizeExpression();
         }
 
         public object Execute()
