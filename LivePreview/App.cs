@@ -43,7 +43,20 @@ namespace LivePreview
         {
             try
             {
-                RusticExpr expr = new RusticExpr(InputExpression.Value);
+                RusticContext context = new RusticContext()
+                {
+                    availableTypeCasts = new System.Collections.Generic.Dictionary<string, Type>()
+                    {
+                        { "int", typeof(int) },
+                        { "float", typeof(float) },
+                        { "double", typeof(double) },
+                    },
+                    variables = new System.Collections.Generic.Dictionary<string, object>()
+                    {
+                        { "PI", Math.PI },
+                    },
+                };
+                RusticExpr expr = new RusticExpr(InputExpression.Value, context);
                 expr.Execute();
                 ResultBox.InnerHTML = expr.PrintToHtml();
             } catch(Exception e)

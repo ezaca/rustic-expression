@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ExpressionStack.RusticExpression
 {
@@ -7,5 +8,6 @@ namespace ExpressionStack.RusticExpression
         public RusticExpr expression { get; private set; }
         public IReadOnlyList<RusticStack> stack => expression.stacks;
         public Dictionary<string, object> variables { get; set; }
+        public Dictionary<string, Type> availableTypeCasts { get; set; }
     }
 }

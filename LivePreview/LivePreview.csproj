@@ -49,6 +49,7 @@
     <Compile Include="RusticExpression\Operations\Pow.cs" />
     <Compile Include="RusticExpression\Operations\PrefixUnary\Negative.cs" />
     <Compile Include="RusticExpression\Operations\PrefixUnary\Positive.cs" />
+    <Compile Include="RusticExpression\Operations\PrefixUnary\TypeCast.cs" />
     <Compile Include="RusticExpression\Operations\Providers\CommonMath.cs" />
     <Compile Include="RusticExpression\Operations\Set.cs" />
     <Compile Include="RusticExpression\Operations\Sub.cs" />

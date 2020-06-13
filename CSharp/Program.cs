@@ -21,13 +21,32 @@ namespace ExpressionStack
             new TestExpr(){ input="(1 + 1)", result = 2 },
             new TestExpr(){ input="2 * (1 + 1f)", result = 4f, explain = "because of parenthesis, and the order of execution makes all Single values." },
             new TestExpr(){ input="2 ** 2 ** 3", result = 256d, explain="64 is invalid because power operator has right precedence." },
+            new TestExpr(){ input="2 * - 2 + 3", result = -1, explain="considering the negative 2." },
+            new TestExpr(){ input="2 * + - 2", result = -4 },
+            new TestExpr(){ input="2 * + - 2 * - 3 -2", result = 10 },
+            new TestExpr(){ input="3 * (float)(1 + 1)", result = 6f, explain="the type cast should make 2 * 2f, which results a Single" },
         };
 
-        int selectedExpression = 0;
+        int selectedExpression = 7;
 
         void _Main(string[] args)
         {
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+
+            RusticContext context = new RusticContext()
+            {
+                availableTypeCasts = new Dictionary<string, Type>()
+                {
+                    { "int", typeof(int) },
+                    { "float", typeof(float) },
+                    { "double", typeof(double) },
+                },
+
+                variables = new Dictionary<string, object>()
+                {
+                    { "PI", Math.PI },
+                },
+            };
 
             bool simplify = false;
             ConsoleKeyInfo key = new ConsoleKeyInfo((char)0, (ConsoleKey)0, false, false, false);
@@ -66,7 +85,7 @@ namespace ExpressionStack
                 Console.BackgroundColor = ConsoleColor.Black;
 
                 TestExpr test = expressions[selectedExpression];
-                RusticExpr expr = new RusticExpr(test.input);
+                RusticExpr expr = new RusticExpr(test.input, context);
 
                 if (simplify)
                     RusticExprBuilder.SimplifyExpression(expr);
@@ -90,14 +109,6 @@ namespace ExpressionStack
                 if (simplify)
                     Console.WriteLine("Showing simplified version.");
             } while ((key = Console.ReadKey(true)).Key != ConsoleKey.Escape);
-        }
-
-        void WaitAndRewrite()
-        {
-            Console.WriteLine("");
-            Console.WriteLine("Pressione qualquer tecla para continuar . . .");
-            Console.ReadKey(true);
-            Console.Clear();
         }
     }
 }

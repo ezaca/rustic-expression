@@ -18,7 +18,7 @@ namespace ExpressionStack.RusticExpression
         };
 
         // MiddleOperators
-        readonly public List<OperationCapture> MiddleOperators = new List<OperationCapture>()
+        readonly public List<GenericCapture> MiddleOperators = new List<GenericCapture>()
         {
             new OperationCapture("[*][*]", new Operations.Pow()),
             new OperationCapture("[+]", new Operations.Add()),
@@ -28,7 +28,7 @@ namespace ExpressionStack.RusticExpression
         };
 
         // LeftOperators
-        readonly public List<OperationCapture> LeftOperators = new List<OperationCapture>()
+        readonly public List<GenericCapture> LeftOperators = new List<GenericCapture>()
         {
             new OperationCapture("[+](?![.0-9])", new Operations.PrefixUnary.Positive()),
             new OperationCapture("[-](?![.0-9])", new Operations.PrefixUnary.Negative()),
@@ -65,6 +65,7 @@ namespace ExpressionStack.RusticExpression
         public RusticParser(RusticContext context)
         {
             this.context = context;
+            LeftOperators.Add(new GenericCapture(@"\([A-Za-z_]\w*\)", RusticTokenMode.Operation, StringToTypeCastOperation));
         }
 
         public void Initialize()
@@ -116,16 +117,17 @@ namespace ExpressionStack.RusticExpression
         RusticToken TryCaptureValueOrLeftOperator(string expression, ref int index, bool canEndGroups = true)
         {
             Match match;
-            if ((match = StickyMatch(openGroupExpr, expression, ref index)).Success)
-            {
-                currentState.Push(ParsingState.ValueOrLeftOperatorOrEnd);
-                return OpenGroupPattern[FindSuccededGroupIndex(match) - 1].ToToken(this, match.Value);
-            }
 
             if ((match = StickyMatch(leftOpExpr, expression, ref index)).Success)
             {
                 currentState.Push(ParsingState.ValueOrLeftOperatorExpected);
-                return LeftOperators[FindSuccededGroupIndex(match) - 1].ToToken();
+                return LeftOperators[FindSuccededGroupIndex(match) - 1].ToToken(this, match.Value);
+            }
+
+            if ((match = StickyMatch(openGroupExpr, expression, ref index)).Success)
+            {
+                currentState.Push(ParsingState.ValueOrLeftOperatorOrEnd);
+                return OpenGroupPattern[FindSuccededGroupIndex(match) - 1].ToToken(this, match.Value);
             }
 
             if ((match = StickyMatch(valueExpr, expression, ref index)).Success)
@@ -157,7 +159,7 @@ namespace ExpressionStack.RusticExpression
             if ((match = StickyMatch(midOpExpr, expression, ref index)).Success)
             {
                 currentState.Push(ParsingState.ValueOrLeftOperatorExpected);
-                return MiddleOperators[FindSuccededGroupIndex(match) - 1].ToToken();
+                return MiddleOperators[FindSuccededGroupIndex(match) - 1].ToToken(this, match.Value);
             }
 
             if (canEndGroups && (match = StickyMatch(closeGroupExpr, expression, ref index)).Success)
@@ -196,6 +198,15 @@ namespace ExpressionStack.RusticExpression
             return doubleValue;
         }
 
+        static object StringToTypeCastOperation(RusticParser parser, string capture)
+        {
+            string name = capture.Trim('(', ')');
+            if (parser.context.availableTypeCasts != null && parser.context.availableTypeCasts.ContainsKey(name))
+                return new Operations.PrefixUnary.TypeCast(parser.context.availableTypeCasts[name]);
+            else
+                throw new Exception($"Invalid type cast, '{name}' is not available as a type");
+        }
+
         static Match StickyMatch(Regex regex, string input, ref int index)
         {
             Match match = regex.Match(input, index);
@@ -220,34 +231,32 @@ namespace ExpressionStack.RusticExpression
             return 0;
         }
 
-        public class OperationCapture
-        {
-            public string pattern;
-            public RusticOperation operation;
-            public OperationCapture(string pattern, RusticOperation operation)
-            {
-                this.pattern = pattern;
-                this.operation = operation;
-            }
-            public RusticToken ToToken() => new RusticToken(RusticTokenMode.Operation, Activator.CreateInstance(operation.GetType()));
-        }
-
         public class GenericCapture
         {
             public string pattern;
+
             public Func<RusticParser, string,object> value;
+
             public RusticTokenMode mode;
-            public GenericCapture(string pattern, RusticTokenMode mode, Func<RusticParser, string,object> value)
+
+            public GenericCapture(string pattern, RusticTokenMode mode, Func<RusticParser, string, object> value)
             {
                 this.pattern = pattern;
-                this.value = value;
                 this.mode = mode;
+                this.value = value;
             }
-            public RusticToken ToToken(RusticParser parser, string captured)
+
+            virtual public RusticToken ToToken(RusticParser parser, string captured)
             {
                 object result = value(parser, captured);
                 return result is RusticToken token ? token : new RusticToken(mode, result);
             }
+        }
+
+        public class OperationCapture: GenericCapture
+        {
+            public OperationCapture(string pattern, RusticOperation operation): base(pattern, RusticTokenMode.Operation, (p,c)=>Activator.CreateInstance(operation.GetType()))
+            { }
         }
 
         public enum ParsingState

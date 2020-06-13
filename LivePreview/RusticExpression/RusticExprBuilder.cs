@@ -171,11 +171,10 @@ namespace ExpressionStack.RusticExpression
 
         public void FinalizeExpression()
         {
-            int index = 0;
-
-            foreach (RusticStack stack in stacks)
+            for (int i = stacks.Count - 1; i >= 0; i--)
             {
-                stack.displayId = index++;
+                RusticStack stack = stacks[i];
+                stack.displayId = i;
                 stack.Prepare();
             }
         }

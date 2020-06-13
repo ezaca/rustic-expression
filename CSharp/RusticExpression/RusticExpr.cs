@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ExpressionStack.RusticExpression
 {
@@ -14,11 +10,19 @@ namespace ExpressionStack.RusticExpression
 
         public readonly List<RusticStack> stacks = new List<RusticStack>();
 
-        RusticContext context;
+        private RusticContext context;
 
         public RusticExpr() => ResetExpression();
 
+        public RusticExpr(RusticContext context) : this() => this.context = context;
+
         public RusticExpr(string expression) : this() => SetExpression(expression);
+
+        public RusticExpr(string expression, RusticContext context) : this()
+        {
+            this.context = context;
+            SetExpression(expression);
+        }
 
         public void ResetExpression()
         {
